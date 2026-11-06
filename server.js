@@ -48,7 +48,7 @@ app.use(cors({
     const allowedOrigins = [
       process.env.FRONTEND_URL || "softnexdigital-frontend.vercel.app",
       "softnexdigital-frontend.vercel.app",
-      "softnexdigital-frontend-eser9w8h5-totala.vercel.app",
+      "softnexdigital-frontend.vercel.app/",
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
