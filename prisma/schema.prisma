@@ -1,0 +1,709 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String     @id @default(uuid())
+  email              String     @unique
+  password           String?
+  name               String?
+  role               String     @default("BUSINESS_ADMIN")
+  tenantId           String?
+  isActive           Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime  @updatedAt
+  isPaymentSubmitted Boolean    @default(false)
+  carts              Cart[]
+  tenant             Tenant?    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  wishlists          Wishlist[]
+}
+
+model Tenant {
+  id                      String               @id @default(uuid())
+  name                    String
+  email                   String               @unique
+  phone                   String?
+  phone2                  String?
+  package                 String               @default("FREE")
+  status                  String               @default("PENDING_APPROVAL")
+  featureFlags            Json                 @default("{}")
+  onboardingCompleted     Boolean              @default(false)
+  logo                    String?
+  address                 String?
+  timezone                String?              @default("Asia/Dhaka")
+  preferences             Json                 @default("{}")
+  orderCounter            Int                  @default(0)
+  companyName             String?
+  tenantEmail             String?
+  socialLinks             Json                 @default("{}")
+  termsAndConditions      String?
+  currency                String               @default("BDT")
+  currencySymbol          String               @default("৳")
+  taxPercentage           Float                @default(0)
+  deliveryCharge          Float                @default(0)
+  productFeatures         Json                 @default("{}")
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  paymentStatus           String               @default("PENDING")
+  transactionId           String?
+  paymentMethod           String?
+  paymentAmount           Float?
+  approvedBy              String?
+  approvedAt              DateTime?
+  paymentSubmittedAt      DateTime?
+  repeatOrderBlockMinutes Float                @default(0.5)
+  maxOrdersPerDay         Int                  @default(10)
+  enableRepeatBlock       Boolean              @default(true)
+  enableIpBlock           Boolean              @default(true)
+  enablePhoneBlock        Boolean              @default(true)
+  // Steadfast Courier Integration
+  steadfastApiKey         String?
+  steadfastSecretKey      String?
+  addresses               Address[]
+  blockedIps              BlockedIp[]
+  blockedPhones           BlockedPhone[]
+  brands                  Brand[]
+  carts                   Cart[]
+  categories              Category[]
+  coupons                 Coupon[]
+  customers               Customer[]
+  expenses                Expense[]
+  landingPages            LandingPage?
+  notifications           Notification[]
+  orders                  Order[]
+  paymentTransactions     PaymentTransaction[]
+  products                Product[]
+  reviews                 Review[]
+  shippingMethods         ShippingMethod[]
+  suppliers               Supplier[]
+  users                   User[]
+  wishlists               Wishlist[]
+  banners                 Banner[]
+  incompleteCheckouts     IncompleteCheckout[]
+  couriers                Courier[]
+  webhookLogs             WebhookLog[]
+}
+
+model Customer {
+  id           String    @id @default(uuid())
+  tenantId     String
+  customerId   String
+  name         String
+  phone        String
+  address      String?
+  email        String?
+  totalOrders  Int       @default(1)
+  totalSpent   Float     @default(0)
+  firstOrderAt DateTime  @default(now())
+  lastOrderAt  DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  addresses    Address[]
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders       Order[]
+
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String
+  title     String
+  message   String
+  type      String   @default("info")
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id              String            @id @default(uuid())
+  tenantId        String
+  name            String
+  description     String?
+  basePrice       Float?
+  images          Json              @default("[]")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  brandId         String?
+  metaDescription String?
+  metaKeywords    String?
+  metaTitle       String?
+  slug            String?           @unique
+  brand           Brand?            @relation(fields: [brandId], references: [id])
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categories      ProductCategory[]
+  imagesRel       ProductImage[]
+  variants        Variant[]
+}
+
+model Supplier {
+  id            String    @id @default(uuid())
+  tenantId      String
+  name          String
+  contactPerson String?
+  phone         String
+  email         String?
+  address       String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variants      Variant[]
+
+  @@index([tenantId])
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  tenantId    String
+  category    String
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model Variant {
+  id             String         @id @default(uuid())
+  productId      String
+  sku            String         @unique
+  // API validation enforces an object whose values are single strings.
+  attributes     Json
+  price          Float
+  compareAtPrice Float?
+  costPrice      Float          @default(0)
+  stock          Float          @default(0)
+  image          String?
+  supplierId     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  cartItems      CartItem[]
+  inventoryLogs  InventoryLog[]
+  orderItems     OrderItem[]
+  product        Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplier       Supplier?      @relation(fields: [supplierId], references: [id])
+  wishlists      Wishlist[]
+  variantImages  VariantImage[]
+
+  @@index([supplierId])
+}
+
+model BlockedPhone {
+  id        String   @id @default(uuid())
+  tenantId  String
+  phone     String
+  reason    String?
+  blockedAt DateTime @default(now())
+  blockedBy String?
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, phone])
+  @@index([tenantId])
+}
+
+model BlockedIp {
+  id        String   @id @default(uuid())
+  tenantId  String
+  ip        String
+  reason    String?
+  blockedAt DateTime @default(now())
+  blockedBy String?
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, ip])
+  @@index([tenantId])
+}
+
+model Order {
+  id                  String               @id @default(uuid())
+  tenantId            String
+  orderNumber         String               @unique
+  customerName        String
+  customerPhone       String
+  customerAddress     String?
+  customerEmail       String?
+  status              String               @default("PENDING")
+  paymentMethod       String?
+  paymentStatus       String               @default("UNPAID")
+  subtotal            Float
+  discount            Float                @default(0)
+  deliveryCharge      Float                @default(0)
+  total               Float
+  notes               String?
+  internalComments    String?
+  deliveryPartner     String?
+  deliveryTrackingId  String?
+  // Courier tracking fields
+  courierConsignmentId String?
+  courierStatus      String?
+  shippedAt          DateTime?
+  deliveredAt        DateTime?
+  deliveryStatus     String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  customerId          String?
+  ipAddress           String?
+  isIncomplete        Boolean              @default(false)
+  billingAddressId    String?
+  couponId            String?
+  discountAmount      Float                @default(0)
+  shippingAddressId   String?
+  shippingMethodId    String?
+  couponUsages        CouponUsage?
+  inventoryLogs       InventoryLog[]
+  billingAddress      Address?             @relation("billing", fields: [billingAddressId], references: [id])
+  coupon              Coupon?              @relation(fields: [couponId], references: [id])
+  customer            Customer?            @relation(fields: [customerId], references: [id])
+  shippingAddress     Address?             @relation("shippingOrders", fields: [shippingAddressId], references: [id])
+  shippingMethod      ShippingMethod?      @relation(fields: [shippingMethodId], references: [id])
+  tenant              Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items               OrderItem[]
+  statusHistory       OrderStatusHistory[]
+  paymentTransactions PaymentTransaction[]
+  returnRequests      ReturnRequest[]
+}
+
+model OrderItem {
+  id            String         @id @default(uuid())
+  orderId       String
+  variantId     String
+  skuAtTime     String?
+  attributes    Json?
+  quantity      Float
+  priceAtTime   Float
+  total         Float
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant       Variant        @relation(fields: [variantId], references: [id])
+  returnRequest ReturnRequest?
+}
+
+model OrderStatusHistory {
+  id        String   @id @default(uuid())
+  orderId   String
+  status    String
+  note      String?
+  changedBy String?
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model InventoryLog {
+  id        String          @id @default(uuid())
+  variantId String
+  quantity  Float
+  orderId   String?
+  createdAt DateTime        @default(now())
+  reason    InventoryReason
+  order     Order?          @relation(fields: [orderId], references: [id])
+  variant   Variant         @relation(fields: [variantId], references: [id], onDelete: Cascade)
+}
+
+model ReturnRequest {
+  id              String     @id @default(uuid())
+  orderId         String
+  orderItemId     String?    @unique
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  reason          String
+  description     String?
+  requestedAmount Float?
+  status          String     @default("PENDING_APPROVAL")
+  adminNote       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  refund          Refund?
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem       OrderItem? @relation(fields: [orderItemId], references: [id])
+}
+
+model Refund {
+  id              String        @id @default(uuid())
+  returnRequestId String        @unique
+  amount          Float
+  method          String?
+  status          String        @default("PENDING")
+  transactionId   String?
+  notes           String?
+  processedBy     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  returnRequest   ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+}
+
+model AttributeTemplate {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  type      String   @default("text")
+  options   Json     @default("[]")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  location  String   @default("")
+  text      String
+  stars     Int      @default(5)
+  phone     String?
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, approved])
+}
+
+model LandingPage {
+  id           String    @id @default(uuid())
+  tenantId     String    @unique
+  templateId   String
+  title        String    @default("My Store")
+  slug         String    @unique
+  sections     Json      @default("[]")
+  styles       Json      @default("{}")
+  seo          Json      @default("{}")
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  logoUrl      String?
+  phoneNumber  String?
+  phoneNumber2 String?
+  emailAddress String?
+  address      String?
+  socialLinks  Json      @default("{}")
+  termsContent String?
+  footerHtml   String?
+  viewCount    Int       @default(0)
+  landingTheme String    @default("grocery")
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model IncompleteCheckout {
+  id              String   @id @default(uuid())
+  tenantId        String
+  sessionId       String?
+  customerName    String?
+  customerPhone   String?
+  customerEmail   String?
+  customerAddress String?
+  notes           String?
+  variantId       String?
+  quantity        Float?
+  cartSessionId   String?
+  ipAddress       String?
+  userAgent       String?
+  city            String?
+  region          String?
+  country         String?
+  formOpenedAt    DateTime @default(now())
+  lastUpdatedAt   DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, sessionId])
+}
+
+model Banner {
+  id            String   @id @default(uuid())
+  tenantId      String
+  imageUrl      String
+  title         String?
+  description   String?
+  categoryId    String?
+  linkUrl       String?
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category      Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([tenantId, isActive])
+}
+
+model Template {
+  id        String   @id @default(uuid())
+  name      String
+  thumbnail String?
+  sections  Json
+  styles    Json
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id          String            @id @default(uuid())
+  tenantId    String
+  name        String
+  slug        String
+  description String?
+  parentId    String?
+  image       String?
+  isActive    Boolean           @default(true)
+  order       Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  parent      Category?         @relation("CategoryToParent", fields: [parentId], references: [id])
+  children    Category[]        @relation("CategoryToParent")
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products    ProductCategory[]
+  banners     Banner[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  tenantId  String
+  sessionId String?
+  userId    String?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User?      @relation(fields: [userId], references: [id])
+  items     CartItem[]
+
+  @@index([tenantId, sessionId])
+  @@index([tenantId, userId])
+}
+
+model CartItem {
+  id        String  @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int     @default(1)
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant   Variant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+}
+
+model Wishlist {
+  id        String  @id @default(uuid())
+  tenantId  String
+  userId    String?
+  sessionId String?
+  variantId String
+  createdAt DateTime @default(now())
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User?   @relation(fields: [userId], references: [id])
+  variant   Variant @relation(fields: [variantId], references: [id])
+
+  @@unique([tenantId, userId, variantId])
+  @@unique([tenantId, sessionId, variantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, sessionId])
+}
+
+model Coupon {
+  id                   String        @id @default(uuid())
+  tenantId             String
+  code                 String        @unique
+  description          String?
+  discountType         String
+  discountValue        Float
+  minOrderAmount       Float?
+  maxDiscount          Float?
+  usageLimit           Int?
+  usedCount            Int           @default(0)
+  perUserLimit         Int?
+  startDate            DateTime
+  endDate              DateTime?
+  isActive             Boolean       @default(true)
+  applicableProducts   Json?
+  applicableCategories Json?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  tenant               Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  usages               CouponUsage[]
+  orders               Order[]
+}
+
+model CouponUsage {
+  id         String   @id @default(uuid())
+  couponId   String
+  orderId    String   @unique
+  customerId String?
+  usedAt     DateTime @default(now())
+  coupon     Coupon   @relation(fields: [couponId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id])
+}
+
+model ShippingMethod {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  price       Float
+  isActive    Boolean @default(true)
+  countries   Json?
+  zones       Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model PaymentTransaction {
+  id           String   @id @default(uuid())
+  tenantId     String
+  orderId      String
+  gateway      String
+  amount       Float
+  currency     String  @default("BDT")
+  status       String
+  gatewayTxId  String?
+  rawResponse  Json?
+  errorMessage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  order        Order    @relation(fields: [orderId], references: [id])
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, orderId])
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  altText   String?
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model VariantImage {
+  id        String   @id @default(uuid())
+  variantId String
+  url       String
+  altText   String?
+  color     String?
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  variant   Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([variantId])
+}
+
+model Brand {
+  id        String    @id @default(uuid())
+  tenantId  String
+  name      String
+  slug      String
+  logo      String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products  Product[]
+
+  @@unique([tenantId, slug])
+}
+
+model Address {
+  id             String   @id @default(uuid())
+  tenantId       String
+  customerId     String
+  label          String
+  recipientName  String
+  phone          String
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  state          String?
+  postalCode     String?
+  country        String  @default("Bangladesh")
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  billingOrders  Order[]  @relation("billing")
+  shippingOrders Order[]  @relation("shippingOrders")
+
+  @@index([tenantId, customerId])
+}
+
+enum InventoryReason {
+  SALE
+  RETURN
+  PURCHASE
+  ADJUSTMENT
+  DAMAGE
+}
+
+model Courier {
+  id          String    @id @default(uuid())
+  tenantId    String
+  name        String
+  apiKey      String
+  apiSecret   String
+  webhookUrl  String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model WebhookLog {
+  id        String    @id @default(uuid())
+  tenantId  String
+  courierId String?
+  payload   Json
+  headers   Json
+  createdAt DateTime  @default(now())
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([courierId])
+}
