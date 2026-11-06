@@ -368,7 +368,7 @@ async function generateOrderNumber(tenantId, prisma) {
 }
 
 /**
- * Send refund notification email to customer
+ * Send refund notification email to 
  * @param {string} customerEmail
  * @param {string} orderNumber
  * @param {number} refundAmount
