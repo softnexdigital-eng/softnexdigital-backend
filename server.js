@@ -116,17 +116,19 @@ app.use((req, res) => {
 // Global error handler (must be last)
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`
-    ╔════════════════════════════════════════╗
-    ║   Multi-Tenant SaaS Backend Started    ║
-    ╠════════════════════════════════════════╣
-    ║  Server running on port ${PORT.toString().padEnd(30)} ║
-    ║  Environment: ${(process.env.NODE_ENV || "development").padEnd(27)} ║
-    ║  Database: ${(process.env.DATABASE_URL || "sqlite").padEnd(33)} ║
-    ╚════════════════════════════════════════╝
-  `);
-});
+// Start server only when run directly (not when imported by Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`
+      ╔═════════════════════════════════════════╗
+      ║   Multi-Tenant SaaS Backend Started    ║
+      ╠════════════════════════════════════════╣
+      ║  Server running on port ${PORT.toString().padEnd(30)} ║
+      ║  Environment: ${(process.env.NODE_ENV || "development").padEnd(27)} ║
+      ║  Database: ${(process.env.DATABASE_URL || "sqlite").padEnd(33)} ║
+      ╚═════════════════════════════════════════╝
+    `);
+  });
+}
 
 module.exports = app;
