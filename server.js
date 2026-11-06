@@ -58,8 +58,7 @@ app.use(cors({
   },
   credentials: true,
 }));
-
-// Health check endpoint
+//  health
 app.get("/health", (req, res) => {
   return res.json({
     success: true,
@@ -132,3 +131,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+  // do every thing 
