@@ -41,3 +41,7 @@ coverage/
 
 # Prisma
 prisma/migrations/
+!prisma/migrations/
+prisma/migrations/*
+!prisma/migrations/20261107100000_add_super_admin_activity/
+!prisma/migrations/20261107100000_add_super_admin_activity/migration.sql

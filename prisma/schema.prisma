@@ -87,6 +87,8 @@ model Tenant {
   incompleteCheckouts     IncompleteCheckout[]
   couriers                Courier[]
   webhookLogs             WebhookLog[]
+  pageVisits              PageVisit[]
+  superAdminNotifications SuperAdminNotification[]
 }
 
 model Customer {
@@ -122,6 +124,21 @@ model Notification {
   createdAt DateTime @default(now())
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@index([tenantId])
+}
+
+model SuperAdminNotification {
+  id        String   @id @default(uuid())
+  type      String
+  title     String
+  message   String
+  entityId  String?
+  tenantId  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([read, createdAt])
   @@index([tenantId])
 }
 
@@ -407,6 +424,21 @@ model LandingPage {
   viewCount    Int       @default(0)
   landingTheme String    @default("grocery")
   tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  visits       PageVisit[]
+}
+
+model PageVisit {
+  id            String      @id @default(uuid())
+  tenantId      String
+  landingPageId String
+  slug          String
+  createdAt     DateTime    @default(now())
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  landingPage   LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([tenantId, createdAt])
+  @@index([slug, createdAt])
 }
 
 model IncompleteCheckout {

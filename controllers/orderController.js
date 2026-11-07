@@ -2,6 +2,7 @@ const prisma = require('../models');
 const crypto = require('crypto');
 const { sendOrderStatusEmail, sendInvoiceToCustomer } = require('../utils/emailService');
 const { generateInvoice } = require('../utils/invoiceService');
+const { createSuperAdminNotification } = require('../utils/superAdminNotifications');
 
 // Helper: generate order number
 async function generateOrderNumber(tenantId) {
@@ -133,6 +134,14 @@ exports.createOrder = async (req, res, next) => {
         statusHistory: { create: { status: 'PENDING', changedBy: req.user.id } },
       },
       include: { items: { include: { variant: true } } },
+    });
+
+    await createSuperAdminNotification({
+      type: 'NEW_ORDER',
+      title: 'New order received',
+      message: `Order ${order.orderNumber} was created for ${tenant?.name || 'a store'}.`,
+      entityId: order.id,
+      tenantId,
     });
 
     // Send invoice email to customer (non-blocking)
@@ -326,6 +335,14 @@ exports.checkoutFromCart = async (req, res, next) => {
         shippingMethod: true,
         coupon: true,
       },
+    });
+
+    await createSuperAdminNotification({
+      type: 'NEW_ORDER',
+      title: 'New order received',
+      message: `Order ${order.orderNumber} was placed for ${tenant?.name || 'a store'}.`,
+      entityId: order.id,
+      tenantId,
     });
 
     // 10. Update coupon usage count

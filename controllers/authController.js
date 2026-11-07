@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../models");
 const { generateOTP, saveOtp, verifyOtp, deleteOtp } = require("../utils/otpStore");
 const { sendOtpEmail } = require("../utils/emailService");
+const { createSuperAdminNotification } = require("../utils/superAdminNotifications");
 
 /**
  * Register / Request OTP (works for both new and existing users)
@@ -85,6 +86,16 @@ const register = async (req, res) => {
           tenantId: tenant.id,
         },
       });
+
+      if (tenant.status === "PENDING_APPROVAL") {
+        await createSuperAdminNotification({
+          type: "NEW_REGISTRATION",
+          title: "New registration request",
+          message: `${tenant.name} submitted a registration request.`,
+          entityId: tenant.id,
+          tenantId: tenant.id,
+        });
+      }
 
       userId = user.id;
       tenantId = tenant.id;

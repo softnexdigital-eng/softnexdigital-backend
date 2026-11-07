@@ -1,4 +1,5 @@
 const prisma = require("../models");
+const { createSuperAdminNotification } = require("../utils/superAdminNotifications");
 const crypto = require("crypto");
 const { sendNewOrderEmail } = require("../utils/emailService");
 const {
@@ -603,6 +604,14 @@ const createPublicOrder = async (req, res, next) => {
       return order;
     });
 
+    await createSuperAdminNotification({
+      type: "NEW_ORDER",
+      title: "New order received",
+      message: `Order ${result.orderNumber} was placed for ${tenant.name}.`,
+      entityId: result.id,
+      tenantId: tenant.id,
+    });
+
     // ── Update coupon usage count ──
     if (coupon) {
       await prisma.coupon.update({
@@ -706,11 +715,17 @@ const trackPageView = async (req, res, next) => {
     if (!page) {
       return res.status(404).json({ success: false, message: "Page not found" });
     }
-    await prisma.landingPage.update({
-      where: { id: page.id },
-      data: { viewCount: { increment: 1 } },
-    });
-    res.json({ success: true, data: { viewCount: page.viewCount + 1 } });
+    const [updatedPage] = await prisma.$transaction([
+      prisma.landingPage.update({
+        where: { id: page.id },
+        data: { viewCount: { increment: 1 } },
+        select: { viewCount: true },
+      }),
+      prisma.pageVisit.create({
+        data: { tenantId: page.tenantId, landingPageId: page.id, slug },
+      }),
+    ]);
+    res.json({ success: true, data: { viewCount: updatedPage.viewCount } });
   } catch (error) {
     next(error);
   }

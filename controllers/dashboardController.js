@@ -221,6 +221,85 @@ const getStats = async (req, res) => {
   }
 };
 
+const getSuperAdminPageVisits = async (req, res, next) => {
+  try {
+    const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 20, 1), 100);
+    const where = req.query.slug ? { slug: String(req.query.slug) } : {};
+
+    const [visits, total] = await Promise.all([
+      prisma.pageVisit.findMany({
+        where,
+        include: { tenant: { select: { id: true, name: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.pageVisit.count({ where }),
+    ]);
+
+    res.json({
+      success: true,
+      data: { visits, total, page, limit },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getSuperAdminNotifications = async (req, res, next) => {
+  try {
+    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 20, 1), 100);
+    const [notifications, unreadCount] = await Promise.all([
+      prisma.superAdminNotification.findMany({
+        include: { tenant: { select: { id: true, name: true } } },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      }),
+      prisma.superAdminNotification.count({ where: { read: false } }),
+    ]);
+
+    res.json({ success: true, data: { notifications, unreadCount } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const markSuperAdminNotificationAsRead = async (req, res, next) => {
+  try {
+    const notification = await prisma.superAdminNotification.findUnique({
+      where: { id: req.params.id },
+    });
+    if (!notification) {
+      return res.status(404).json({ success: false, message: "Notification not found" });
+    }
+
+    await prisma.superAdminNotification.update({
+      where: { id: notification.id },
+      data: { read: true },
+    });
+    res.json({ success: true, message: "Notification marked as read" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const markAllSuperAdminNotificationsAsRead = async (req, res, next) => {
+  try {
+    await prisma.superAdminNotification.updateMany({
+      where: { read: false },
+      data: { read: true },
+    });
+    res.json({ success: true, message: "All notifications marked as read" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getStats,
+  getSuperAdminPageVisits,
+  getSuperAdminNotifications,
+  markSuperAdminNotificationAsRead,
+  markAllSuperAdminNotificationsAsRead,
 };
