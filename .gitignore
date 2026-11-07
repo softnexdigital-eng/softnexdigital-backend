@@ -45,3 +45,5 @@ prisma/migrations/
 prisma/migrations/*
 !prisma/migrations/20261107100000_add_super_admin_activity/
 !prisma/migrations/20261107100000_add_super_admin_activity/migration.sql
+!prisma/migrations/20261107113000_add_meta_pixel_tracking/
+!prisma/migrations/20261107113000_add_meta_pixel_tracking/migration.sql

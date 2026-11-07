@@ -2,6 +2,7 @@ const prisma = require("../models");
 const { createSuperAdminNotification } = require("../utils/superAdminNotifications");
 const crypto = require("crypto");
 const { sendNewOrderEmail } = require("../utils/emailService");
+const { sendMetaEvent } = require("../utils/metaConversionsApi");
 const {
   checkPhoneBlocked,
   checkIpBlocked,
@@ -347,6 +348,10 @@ const createPublicOrder = async (req, res, next) => {
       couponCode,
       discountAmount = 0,
       sessionId,
+      marketingConsent,
+      fbp,
+      fbc,
+      eventSourceUrl,
       attributes: selectedAttributes,
       selectedAttributes: selectedCartAttributes,
     } = req.body;
@@ -611,6 +616,57 @@ const createPublicOrder = async (req, res, next) => {
       entityId: result.id,
       tenantId: tenant.id,
     });
+
+    if (marketingConsent === true) {
+      try {
+        const sourceUrl = eventSourceUrl || req.get("referer") || req.get("origin");
+        if (!sourceUrl) {
+          throw new Error("No storefront URL was provided for the Meta Purchase event");
+        }
+        const trackingOrder = await prisma.order.findUnique({
+          where: { id: result.id },
+          select: {
+            id: true,
+            total: true,
+            items: {
+              select: {
+                quantity: true,
+                priceAtTime: true,
+                variant: { select: { productId: true } },
+              },
+            },
+          },
+        });
+        const contents = trackingOrder.items.map(item => ({
+          id: item.variant.productId,
+          quantity: item.quantity,
+          item_price: item.priceAtTime,
+        }));
+        await sendMetaEvent({
+          tenantId: tenant.id,
+          eventName: "Purchase",
+          eventId: trackingOrder.id,
+          eventSourceUrl: sourceUrl,
+          userData: {
+            email: customerEmail,
+            phone: cleanedPhone,
+            ipAddress: req.ip,
+            userAgent: req.get("user-agent"),
+            fbp,
+            fbc,
+          },
+          customData: {
+            value: trackingOrder.total,
+            currency: tenant.currency,
+            content_ids: [...new Set(contents.map(item => item.id))],
+            content_type: "product",
+            contents,
+          },
+        });
+      } catch (trackingError) {
+        console.error("Meta Purchase event delivery failed:", trackingError.message);
+      }
+    }
 
     // ── Update coupon usage count ──
     if (coupon) {

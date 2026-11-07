@@ -37,6 +37,7 @@ const incompleteCheckoutRoutes = require('./routes/incompleteCheckoutRoutes');
 const steadfastRoutes = require('./routes/steadfastRoutes');
 const courierRoutes = require('./routes/courierRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const metaMarketingRoutes = require('./routes/metaMarketingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -102,6 +103,7 @@ app.use('/api/incomplete-checkouts', incompleteCheckoutRoutes);
 app.use('/api/steadfast', steadfastRoutes);
 app.use('/api/couriers', courierRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/marketing/meta', metaMarketingRoutes);
 
 // 404 handler
 app.use((req, res) => {
