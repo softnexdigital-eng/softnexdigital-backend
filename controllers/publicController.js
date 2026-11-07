@@ -354,6 +354,7 @@ const createPublicOrder = async (req, res, next) => {
       eventSourceUrl,
       attributes: selectedAttributes,
       selectedAttributes: selectedCartAttributes,
+      paymentMethod,
     } = req.body;
 
     // ── Validation ──
@@ -585,6 +586,8 @@ const createPublicOrder = async (req, res, next) => {
           notes,
           ipAddress: clientIp || null,
           couponId: coupon?.id || null,
+          paymentMethod: paymentMethod || "CASH_ON_DELIVERY",
+          paymentStatus: (paymentMethod || "CASH_ON_DELIVERY") === "CASH_ON_DELIVERY" ? "UNPAID" : "PENDING",
           items: {
             create: orderItemsData,
           },
