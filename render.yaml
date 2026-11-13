@@ -1,0 +1,31 @@
+# Render Blueprint for Backend API
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: multitenant-saas-backend
+    env: node
+    region: singapore # Closest to Bangladesh
+    plan: free
+    buildCommand: npm install && npx prisma generate
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: DATABASE_URL
+        sync: false # You'll set this manually from Neon.tech
+      - key: JWT_SECRET
+        generateValue: true # Auto-generates a secure random value
+      - key: CORS_ORIGIN
+        value: https://your-domain.vercel.app
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false

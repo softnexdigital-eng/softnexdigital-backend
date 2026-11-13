@@ -1,0 +1,13 @@
+# PROJECT RULES (read at the start of every task)
+- This is an EXISTING multi-tenant SaaS (Next.js App Router, Express, Prisma, PostgreSQL). It is NOT greenfield. Never rewrite the app; extend it. Never break existing ecommerce, auth, payments, courier, return, refund, coupon, notification features.
+- The full product spec is in `docs/MASTER_SPEC.md`. Each task tells you which sections to read. Read only those sections.
+- Progress is tracked in `IMPLEMENTATION_PROGRESS.md`. At the START of every task read it. At the END update it. Statuses allowed: NOT_STARTED, IN_PROGRESS, COMPLETED, BLOCKED. Never mark COMPLETED unless every item in the Definition of Done below is true.
+- Definition of Done for any feature: Prisma model + safe idempotent migration + backend service/controller/route with real business logic + validation + auth + tenant isolation + branch authorization + role permission + frontend UI wired to the real API + loading/error/empty states + automated tests actually executed and passing.
+- Forbidden: mock data in app code, static stats, empty handlers, TODO/FIXME/placeholders in finished features, fake success toasts, UI-only or model-only completion.
+- Security: derive tenantId from authenticated server context only. Never trust client prices, totals, stock, tenantId, or payment status. Use DB transactions for POS sales, checkout, receiving, transfers, recipe consumption, fabric allocation, refunds, worker payment approval, register close. Use idempotency keys for duplicate-prone actions.
+- Reuse existing components, services, API conventions, and models. Do not duplicate Product/Variant/Order/Customer/Payment/Inventory.
+- Inventory ledger entries are never edited; corrections use reversal movements.
+- Before major changes: run `git status`, preserve uncommitted work. After each task: run prisma validate, prisma generate, backend build, frontend build, relevant tests; fix errors. Never claim tests passed unless you ran them and saw the output.
+- UI: touch targets >= 48px, responsive 1366x768 / 1920x1080 / tablet, keyboard + barcode friendly.
+- Be honest: if something is unfinished, say so and keep it IN_PROGRESS or BLOCKED. Do not stop early because a task is large; split it, finish each part, and record exactly where you stopped in IMPLEMENTATION_PROGRESS.md.
+- At the end of every task output: files changed, migrations added, endpoints added, tests run with real results, remaining work, exact next step.
