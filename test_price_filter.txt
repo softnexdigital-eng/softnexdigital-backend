@@ -1,0 +1,246 @@
+TAP version 13
+# Business foundation backfilled for tenant tenant-1: default branch branch-1
+# Business foundation backfilled for tenant tenant-2: default branch branch-4
+# Business foundation backfilled for tenant tenant-1: default branch branch-1
+# Business foundation backfilled for tenant tenant-2: default branch branch-4
+# Subtest: validates business type, business settings, and opening-hours input
+ok 1 - validates business type, business settings, and opening-hours input
+  ---
+  duration_ms: 4.8119
+  type: 'test'
+  ...
+# Subtest: business profile and settings updates are tenant-scoped and administrator-only
+ok 2 - business profile and settings updates are tenant-scoped and administrator-only
+  ---
+  duration_ms: 15.1632
+  type: 'test'
+  ...
+# Subtest: branch CRUD, activation, default selection, and tenant isolation
+ok 3 - branch CRUD, activation, default selection, and tenant isolation
+  ---
+  duration_ms: 4.013
+  type: 'test'
+  ...
+# Subtest: branch member APIs reject cross-tenant users and keep membership scoped
+ok 4 - branch member APIs reject cross-tenant users and keep membership scoped
+  ---
+  duration_ms: 1.9696
+  type: 'test'
+  ...
+# Subtest: branch manager changes keep manager membership aligned
+ok 5 - branch manager changes keep manager membership aligned
+  ---
+  duration_ms: 0.7585
+  type: 'test'
+  ...
+# Subtest: branch middleware rejects cross-tenant and non-member access
+ok 6 - branch middleware rejects cross-tenant and non-member access
+  ---
+  duration_ms: 0.7088
+  type: 'test'
+  ...
+# Subtest: inactive branches deny inventory access even to tenant admins unless explicitly allowed
+ok 7 - inactive branches deny inventory access even to tenant admins unless explicitly allowed
+  ---
+  duration_ms: 0.4855
+  type: 'test'
+  ...
+# Subtest: business foundation backfill is idempotent and grants existing tenant users the default branch
+ok 8 - business foundation backfill is idempotent and grants existing tenant users the default branch
+  ---
+  duration_ms: 3.6829
+  type: 'test'
+  ...
+# Subtest: inventory reads scope every query to the authenticated tenant and authorized branch
+ok 9 - inventory reads scope every query to the authenticated tenant and authorized branch
+  ---
+  duration_ms: 17.1241
+  type: 'test'
+  ...
+# Subtest: inventory movement filters reject invalid types and date ranges
+ok 10 - inventory movement filters reject invalid types and date ranges
+  ---
+  duration_ms: 0.8792
+  type: 'test'
+  ...
+# Subtest: inventory movements keep branch balance and legacy Variant.stock in sync
+ok 11 - inventory movements keep branch balance and legacy Variant.stock in sync
+  ---
+  duration_ms: 2.4292
+  type: 'test'
+  ...
+# Subtest: inventory idempotency prevents applying the same movement twice
+ok 12 - inventory idempotency prevents applying the same movement twice
+  ---
+  duration_ms: 0.3254
+  type: 'test'
+  ...
+# Subtest: stock counts calculate their delta while holding the balance lock and are idempotent
+ok 13 - stock counts calculate their delta while holding the balance lock and are idempotent
+  ---
+  duration_ms: 2.2316
+  type: 'test'
+  ...
+# Subtest: negative stock is rejected unless tenant policy explicitly allows it
+ok 14 - negative stock is rejected unless tenant policy explicitly allows it
+  ---
+  duration_ms: 1.013
+  type: 'test'
+  ...
+# Subtest: tenant isolation rejects a branch or variant from another tenant
+ok 15 - tenant isolation rejects a branch or variant from another tenant
+  ---
+  duration_ms: 0.3872
+  type: 'test'
+  ...
+# Subtest: concurrent sales cannot oversell the last unit
+ok 16 - concurrent sales cannot oversell the last unit
+  ---
+  duration_ms: 0.7685
+  type: 'test'
+  ...
+# Subtest: legacy orders without a branch confirm and cancel against the default branch
+ok 17 - legacy orders without a branch confirm and cancel against the default branch
+  ---
+  duration_ms: 0.934
+  type: 'test'
+  ...
+# Subtest: listProducts filters by supplierId on variants
+ok 18 - listProducts filters by supplierId on variants
+  ---
+  duration_ms: 1.6031
+  type: 'test'
+  ...
+# Subtest: listProducts without supplierId returns all products
+not ok 19 - listProducts without supplierId returns all products
+  ---
+  duration_ms: 0.907
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\productSupplierFilter.test.js:91:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 2
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\productSupplierFilter.test.js:100:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: listProducts with non-matching supplierId returns empty
+not ok 20 - listProducts with non-matching supplierId returns empty
+  ---
+  duration_ms: 0.4577
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\productSupplierFilter.test.js:103:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\productSupplierFilter.test.js:112:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# (node:16188) Warning: Accessing non-existent property 'lastOrderCounter' of module exports inside circular dependency
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: createPurchaseOrder validates required fields
+ok 21 - createPurchaseOrder validates required fields
+  ---
+  duration_ms: 3.5751
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder requires supplierId
+ok 22 - createPurchaseOrder requires supplierId
+  ---
+  duration_ms: 0.5903
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder creates draft order with items
+ok 23 - createPurchaseOrder creates draft order with items
+  ---
+  duration_ms: 6.0023
+  type: 'test'
+  ...
+# Subtest: submitPurchaseOrder requires DRAFT status
+ok 24 - submitPurchaseOrder requires DRAFT status
+  ---
+  duration_ms: 0.4608
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder validates items and quantities
+ok 25 - receivePurchaseOrder validates items and quantities
+  ---
+  duration_ms: 0.3113
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder rejects over-receiving
+ok 26 - receivePurchaseOrder rejects over-receiving
+  ---
+  duration_ms: 0.6814
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment validates required fields
+ok 27 - createSupplierPayment validates required fields
+  ---
+  duration_ms: 0.2899
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment creates payment record
+ok 28 - createSupplierPayment creates payment record
+  ---
+  duration_ms: 0.3127
+  type: 'test'
+  ...
+# Subtest: service layer: generateOrderNumber increments counter
+ok 29 - service layer: generateOrderNumber increments counter
+  ---
+  duration_ms: 1.1239
+  type: 'test'
+  ...
+# Subtest: createSupplier with branch context fallback for super admin
+ok 30 - createSupplier with branch context fallback for super admin
+  ---
+  duration_ms: 2.195
+  type: 'test'
+  ...
+# Subtest: getSuppliers with branch context fallback for super admin
+ok 31 - getSuppliers with branch context fallback for super admin
+  ---
+  duration_ms: 0.56
+  type: 'test'
+  ...
+# Subtest: getSuppliers without branch context returns 403 for super admin
+ok 32 - getSuppliers without branch context returns 403 for super admin
+  ---
+  duration_ms: 0.357
+  type: 'test'
+  ...
+# Subtest: getSuppliers with tenantId in user works for regular user
+ok 33 - getSuppliers with tenantId in user works for regular user
+  ---
+  duration_ms: 0.258
+  type: 'test'
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 31
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 253.6135

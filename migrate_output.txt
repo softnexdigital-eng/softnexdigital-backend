@@ -1,0 +1,8 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-polished-tooth-ap9q6kpv.c-7.us-east-1.aws.neon.tech"
+
+6 migrations found in prisma/migrations
+
+
+No pending migrations to apply.

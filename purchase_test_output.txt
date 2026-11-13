@@ -1,0 +1,163 @@
+TAP version 13
+# Subtest: createPurchaseOrder validates required fields
+not ok 1 - createPurchaseOrder validates required fields
+  ---
+  duration_ms: 2.5351
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\purchase.test.js:235:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /At least one item is required/. Input:
+    
+    'Error: supplierId is required'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+  error: 'supplierId is required'
+  stack: |-
+    fail (E:\my local git\multitenant-saas-backend\backend\controllers\purchaseController.js:15:17)
+    exports.createPurchaseOrder (E:\my local git\multitenant-saas-backend\backend\controllers\purchaseController.js:47:22)
+    call (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:230:9)
+    TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:241:24)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:241:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: createPurchaseOrder requires supplierId
+ok 2 - createPurchaseOrder requires supplierId
+  ---
+  duration_ms: 0.18
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder creates draft order with items
+ok 3 - createPurchaseOrder creates draft order with items
+  ---
+  duration_ms: 3.1101
+  type: 'test'
+  ...
+# Subtest: submitPurchaseOrder requires DRAFT status
+ok 4 - submitPurchaseOrder requires DRAFT status
+  ---
+  duration_ms: 0.3217
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder validates items and quantities
+ok 5 - receivePurchaseOrder validates items and quantities
+  ---
+  duration_ms: 0.2591
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder rejects over-receiving
+ok 6 - receivePurchaseOrder rejects over-receiving
+  ---
+  duration_ms: 0.4184
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder updates receivedQty and creates movement
+not ok 7 - receivePurchaseOrder updates receivedQty and creates movement
+  ---
+  duration_ms: 0.7375
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\purchase.test.js:307:1'
+  failureType: 'testCodeFailure'
+  error: 'tx.branchInventory.update is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    applyMovementInTransaction (E:\my local git\multitenant-saas-backend\backend\services\inventoryService.js:182:28)
+    async receivePurchaseOrder (E:\my local git\multitenant-saas-backend\backend\services\purchaseService.js:328:5)
+    async exports.receivePurchaseOrder (E:\my local git\multitenant-saas-backend\backend\controllers\purchaseController.js:151:20)
+    async call (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:230:3)
+    async TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:314:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: receivePurchaseOrder moves status to PARTIALLY_RECEIVED when partially received
+not ok 8 - receivePurchaseOrder moves status to PARTIALLY_RECEIVED when partially received
+  ---
+  duration_ms: 0.9131
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\purchase.test.js:321:1'
+  failureType: 'testCodeFailure'
+  error: 'tx.branchInventory.update is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    applyMovementInTransaction (E:\my local git\multitenant-saas-backend\backend\services\inventoryService.js:182:28)
+    async receivePurchaseOrder (E:\my local git\multitenant-saas-backend\backend\services\purchaseService.js:328:5)
+    async exports.receivePurchaseOrder (E:\my local git\multitenant-saas-backend\backend\controllers\purchaseController.js:151:20)
+    async call (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:230:3)
+    async TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:328:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: createSupplierPayment validates required fields
+ok 9 - createSupplierPayment validates required fields
+  ---
+  duration_ms: 0.4027
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment creates payment record
+ok 10 - createSupplierPayment creates payment record
+  ---
+  duration_ms: 0.4407
+  type: 'test'
+  ...
+# Subtest: getSupplierLedger calculates total due correctly
+not ok 11 - getSupplierLedger calculates total due correctly
+  ---
+  duration_ms: 0.4133
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\purchase.test.js:354:1'
+  failureType: 'testCodeFailure'
+  error: 'Supplier not found'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    createPurchaseError (E:\my local git\multitenant-saas-backend\backend\services\purchaseService.js:4:17)
+    getSupplierLedger (E:\my local git\multitenant-saas-backend\backend\services\purchaseService.js:436:24)
+    async exports.getSupplierLedger (E:\my local git\multitenant-saas-backend\backend\controllers\purchaseController.js:217:20)
+    async call (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:230:3)
+    async TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:372:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: service layer: generateOrderNumber increments counter
+ok 12 - service layer: generateOrderNumber increments counter
+  ---
+  duration_ms: 0.4165
+  type: 'test'
+  ...
+# Subtest: service layer: createPurchaseOrder uses inventory costPrice when not provided
+not ok 13 - service layer: createPurchaseOrder uses inventory costPrice when not provided
+  ---
+  duration_ms: 0.2674
+  type: 'test'
+  location: 'E:\\my local git\\multitenant-saas-backend\\backend\\tests\\purchase.test.js:393:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'findFirst')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    resolveBranchForPurchase (E:\my local git\multitenant-saas-backend\backend\services\purchaseService.js:29:50)
+    async Object.createPurchaseOrder (E:\my local git\multitenant-saas-backend\backend\services\purchaseService.js:58:18)
+    async TestContext.<anonymous> (E:\my local git\multitenant-saas-backend\backend\tests\purchase.test.js:406:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 8
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 106.5985

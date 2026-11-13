@@ -1,0 +1,172 @@
+TAP version 13
+# Business foundation backfilled for tenant tenant-1: default branch branch-1
+# Business foundation backfilled for tenant tenant-2: default branch branch-4
+# Business foundation backfilled for tenant tenant-1: default branch branch-1
+# Business foundation backfilled for tenant tenant-2: default branch branch-4
+# Subtest: validates business type, business settings, and opening-hours input
+ok 1 - validates business type, business settings, and opening-hours input
+  ---
+  duration_ms: 4.0041
+  type: 'test'
+  ...
+# Subtest: business profile and settings updates are tenant-scoped and administrator-only
+ok 2 - business profile and settings updates are tenant-scoped and administrator-only
+  ---
+  duration_ms: 65.3172
+  type: 'test'
+  ...
+# Subtest: branch CRUD, activation, default selection, and tenant isolation
+ok 3 - branch CRUD, activation, default selection, and tenant isolation
+  ---
+  duration_ms: 2.1768
+  type: 'test'
+  ...
+# Subtest: branch member APIs reject cross-tenant users and keep membership scoped
+ok 4 - branch member APIs reject cross-tenant users and keep membership scoped
+  ---
+  duration_ms: 0.8148
+  type: 'test'
+  ...
+# Subtest: branch manager changes keep manager membership aligned
+ok 5 - branch manager changes keep manager membership aligned
+  ---
+  duration_ms: 0.4906
+  type: 'test'
+  ...
+# Subtest: branch middleware rejects cross-tenant and non-member access
+ok 6 - branch middleware rejects cross-tenant and non-member access
+  ---
+  duration_ms: 0.4633
+  type: 'test'
+  ...
+# Subtest: inactive branches deny inventory access even to tenant admins unless explicitly allowed
+ok 7 - inactive branches deny inventory access even to tenant admins unless explicitly allowed
+  ---
+  duration_ms: 0.2888
+  type: 'test'
+  ...
+# Subtest: business foundation backfill is idempotent and grants existing tenant users the default branch
+ok 8 - business foundation backfill is idempotent and grants existing tenant users the default branch
+  ---
+  duration_ms: 1.7035
+  type: 'test'
+  ...
+# Subtest: inventory reads scope every query to the authenticated tenant and authorized branch
+ok 9 - inventory reads scope every query to the authenticated tenant and authorized branch
+  ---
+  duration_ms: 14.1769
+  type: 'test'
+  ...
+# Subtest: inventory movement filters reject invalid types and date ranges
+ok 10 - inventory movement filters reject invalid types and date ranges
+  ---
+  duration_ms: 1.2213
+  type: 'test'
+  ...
+# Subtest: inventory movements keep branch balance and legacy Variant.stock in sync
+ok 11 - inventory movements keep branch balance and legacy Variant.stock in sync
+  ---
+  duration_ms: 2.7941
+  type: 'test'
+  ...
+# Subtest: inventory idempotency prevents applying the same movement twice
+ok 12 - inventory idempotency prevents applying the same movement twice
+  ---
+  duration_ms: 0.2822
+  type: 'test'
+  ...
+# Subtest: stock counts calculate their delta while holding the balance lock and are idempotent
+ok 13 - stock counts calculate their delta while holding the balance lock and are idempotent
+  ---
+  duration_ms: 1.3517
+  type: 'test'
+  ...
+# Subtest: negative stock is rejected unless tenant policy explicitly allows it
+ok 14 - negative stock is rejected unless tenant policy explicitly allows it
+  ---
+  duration_ms: 0.9295
+  type: 'test'
+  ...
+# Subtest: tenant isolation rejects a branch or variant from another tenant
+ok 15 - tenant isolation rejects a branch or variant from another tenant
+  ---
+  duration_ms: 3.0539
+  type: 'test'
+  ...
+# Subtest: concurrent sales cannot oversell the last unit
+ok 16 - concurrent sales cannot oversell the last unit
+  ---
+  duration_ms: 0.619
+  type: 'test'
+  ...
+# Subtest: legacy orders without a branch confirm and cancel against the default branch
+ok 17 - legacy orders without a branch confirm and cancel against the default branch
+  ---
+  duration_ms: 0.7031
+  type: 'test'
+  ...
+# (node:20588) Warning: Accessing non-existent property 'lastOrderCounter' of module exports inside circular dependency
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: createPurchaseOrder validates required fields
+ok 18 - createPurchaseOrder validates required fields
+  ---
+  duration_ms: 1.6732
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder requires supplierId
+ok 19 - createPurchaseOrder requires supplierId
+  ---
+  duration_ms: 0.4587
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder creates draft order with items
+ok 20 - createPurchaseOrder creates draft order with items
+  ---
+  duration_ms: 5.4346
+  type: 'test'
+  ...
+# Subtest: submitPurchaseOrder requires DRAFT status
+ok 21 - submitPurchaseOrder requires DRAFT status
+  ---
+  duration_ms: 0.4725
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder validates items and quantities
+ok 22 - receivePurchaseOrder validates items and quantities
+  ---
+  duration_ms: 0.282
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder rejects over-receiving
+ok 23 - receivePurchaseOrder rejects over-receiving
+  ---
+  duration_ms: 0.5165
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment validates required fields
+ok 24 - createSupplierPayment validates required fields
+  ---
+  duration_ms: 0.2751
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment creates payment record
+ok 25 - createSupplierPayment creates payment record
+  ---
+  duration_ms: 0.3966
+  type: 'test'
+  ...
+# Subtest: service layer: generateOrderNumber increments counter
+ok 26 - service layer: generateOrderNumber increments counter
+  ---
+  duration_ms: 0.6039
+  type: 'test'
+  ...
+1..26
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 232.4279

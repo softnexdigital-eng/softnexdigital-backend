@@ -1,0 +1,13 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+node.exe : Error: 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\User\AppData\Roaming\n ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+EPERM: operation not permitted, unlink 'E:\my local 
+git\multitenant-saas-backend\backend\node_modules\.prisma\client\query_engine-windows.dll.node'
+
+

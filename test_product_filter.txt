@@ -1,0 +1,196 @@
+TAP version 13
+# Business foundation backfilled for tenant tenant-1: default branch branch-1
+# Business foundation backfilled for tenant tenant-2: default branch branch-4
+# Business foundation backfilled for tenant tenant-1: default branch branch-1
+# Business foundation backfilled for tenant tenant-2: default branch branch-4
+# Subtest: validates business type, business settings, and opening-hours input
+ok 1 - validates business type, business settings, and opening-hours input
+  ---
+  duration_ms: 4.4168
+  type: 'test'
+  ...
+# Subtest: business profile and settings updates are tenant-scoped and administrator-only
+ok 2 - business profile and settings updates are tenant-scoped and administrator-only
+  ---
+  duration_ms: 15.2769
+  type: 'test'
+  ...
+# Subtest: branch CRUD, activation, default selection, and tenant isolation
+ok 3 - branch CRUD, activation, default selection, and tenant isolation
+  ---
+  duration_ms: 3.225
+  type: 'test'
+  ...
+# Subtest: branch member APIs reject cross-tenant users and keep membership scoped
+ok 4 - branch member APIs reject cross-tenant users and keep membership scoped
+  ---
+  duration_ms: 1.8529
+  type: 'test'
+  ...
+# Subtest: branch manager changes keep manager membership aligned
+ok 5 - branch manager changes keep manager membership aligned
+  ---
+  duration_ms: 0.7494
+  type: 'test'
+  ...
+# Subtest: branch middleware rejects cross-tenant and non-member access
+ok 6 - branch middleware rejects cross-tenant and non-member access
+  ---
+  duration_ms: 0.6914
+  type: 'test'
+  ...
+# Subtest: inactive branches deny inventory access even to tenant admins unless explicitly allowed
+ok 7 - inactive branches deny inventory access even to tenant admins unless explicitly allowed
+  ---
+  duration_ms: 0.6228
+  type: 'test'
+  ...
+# Subtest: business foundation backfill is idempotent and grants existing tenant users the default branch
+ok 8 - business foundation backfill is idempotent and grants existing tenant users the default branch
+  ---
+  duration_ms: 3.8655
+  type: 'test'
+  ...
+# Subtest: inventory reads scope every query to the authenticated tenant and authorized branch
+ok 9 - inventory reads scope every query to the authenticated tenant and authorized branch
+  ---
+  duration_ms: 2.7937
+  type: 'test'
+  ...
+# Subtest: inventory movement filters reject invalid types and date ranges
+ok 10 - inventory movement filters reject invalid types and date ranges
+  ---
+  duration_ms: 1.2169
+  type: 'test'
+  ...
+# Subtest: inventory movements keep branch balance and legacy Variant.stock in sync
+ok 11 - inventory movements keep branch balance and legacy Variant.stock in sync
+  ---
+  duration_ms: 1.5483
+  type: 'test'
+  ...
+# Subtest: inventory idempotency prevents applying the same movement twice
+ok 12 - inventory idempotency prevents applying the same movement twice
+  ---
+  duration_ms: 0.3096
+  type: 'test'
+  ...
+# Subtest: stock counts calculate their delta while holding the balance lock and are idempotent
+ok 13 - stock counts calculate their delta while holding the balance lock and are idempotent
+  ---
+  duration_ms: 1.1949
+  type: 'test'
+  ...
+# Subtest: negative stock is rejected unless tenant policy explicitly allows it
+ok 14 - negative stock is rejected unless tenant policy explicitly allows it
+  ---
+  duration_ms: 0.7039
+  type: 'test'
+  ...
+# Subtest: tenant isolation rejects a branch or variant from another tenant
+ok 15 - tenant isolation rejects a branch or variant from another tenant
+  ---
+  duration_ms: 0.304
+  type: 'test'
+  ...
+# Subtest: concurrent sales cannot oversell the last unit
+ok 16 - concurrent sales cannot oversell the last unit
+  ---
+  duration_ms: 0.636
+  type: 'test'
+  ...
+# Subtest: legacy orders without a branch confirm and cancel against the default branch
+ok 17 - legacy orders without a branch confirm and cancel against the default branch
+  ---
+  duration_ms: 1.6159
+  type: 'test'
+  ...
+# (node:9904) Warning: Accessing non-existent property 'lastOrderCounter' of module exports inside circular dependency
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: createPurchaseOrder validates required fields
+ok 18 - createPurchaseOrder validates required fields
+  ---
+  duration_ms: 2.3905
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder requires supplierId
+ok 19 - createPurchaseOrder requires supplierId
+  ---
+  duration_ms: 0.4134
+  type: 'test'
+  ...
+# Subtest: createPurchaseOrder creates draft order with items
+ok 20 - createPurchaseOrder creates draft order with items
+  ---
+  duration_ms: 4.608
+  type: 'test'
+  ...
+# Subtest: submitPurchaseOrder requires DRAFT status
+ok 21 - submitPurchaseOrder requires DRAFT status
+  ---
+  duration_ms: 0.76
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder validates items and quantities
+ok 22 - receivePurchaseOrder validates items and quantities
+  ---
+  duration_ms: 0.4338
+  type: 'test'
+  ...
+# Subtest: receivePurchaseOrder rejects over-receiving
+ok 23 - receivePurchaseOrder rejects over-receiving
+  ---
+  duration_ms: 0.8647
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment validates required fields
+ok 24 - createSupplierPayment validates required fields
+  ---
+  duration_ms: 0.4747
+  type: 'test'
+  ...
+# Subtest: createSupplierPayment creates payment record
+ok 25 - createSupplierPayment creates payment record
+  ---
+  duration_ms: 0.5106
+  type: 'test'
+  ...
+# Subtest: service layer: generateOrderNumber increments counter
+ok 26 - service layer: generateOrderNumber increments counter
+  ---
+  duration_ms: 0.8537
+  type: 'test'
+  ...
+# Subtest: createSupplier with branch context fallback for super admin
+ok 27 - createSupplier with branch context fallback for super admin
+  ---
+  duration_ms: 1.5367
+  type: 'test'
+  ...
+# Subtest: getSuppliers with branch context fallback for super admin
+ok 28 - getSuppliers with branch context fallback for super admin
+  ---
+  duration_ms: 0.3497
+  type: 'test'
+  ...
+# Subtest: getSuppliers without branch context returns 403 for super admin
+ok 29 - getSuppliers without branch context returns 403 for super admin
+  ---
+  duration_ms: 0.1952
+  type: 'test'
+  ...
+# Subtest: getSuppliers with tenantId in user works for regular user
+ok 30 - getSuppliers with tenantId in user works for regular user
+  ---
+  duration_ms: 0.1284
+  type: 'test'
+  ...
+1..30
+# tests 30
+# suites 0
+# pass 30
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 244.0775
