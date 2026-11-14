@@ -55,6 +55,4 @@ prisma/migrations/*
 config.bat
 
 # Secrets
-.env
-.env.local
 .env.*.local
