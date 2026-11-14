@@ -24,9 +24,15 @@ async function verifyProductAccess(productId, tenantId) {
 
 function validateVariantAttributes(attributes) {
   if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) {
-    return 'Attributes must be an object of single string values';
+    return 'Attributes must be an object';
   }
   for (const [name, value] of Object.entries(attributes)) {
+    if (Array.isArray(value)) {
+      if (value.length === 0 || !value.some((v) => typeof v === 'string' && v.trim())) {
+        return `Attribute "${name}" must have at least one non-empty string value`;
+      }
+      continue;
+    }
     if (typeof value !== 'string' || !value.trim()) {
       return `Attribute "${name}" must have exactly one non-empty string value`;
     }
@@ -166,42 +172,67 @@ exports.addVariant = async (req, res, next) => {
     if (!Number.isFinite(openingQuantity) || openingQuantity < 0) {
       return res.status(400).json({ success: false, message: 'stock must be a non-negative number' });
     }
-    const variant = await prisma.$transaction(async (tx) => {
-      const created = await tx.variant.create({
-        data: {
-          productId,
-          sku,
-          attributes: attributes || {},
-          price: parseFloat(price),
-          compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
-          costPrice: costPrice ? parseFloat(costPrice) : 0,
-          stock: 0,
-          image: image || null,
-          supplierId: supplierId || null,
-        },
+
+    const created = await prisma.variant.create({
+      data: {
+        productId,
+        sku,
+        attributes: attributes || {},
+        price: parseFloat(price),
+        compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
+        costPrice: costPrice ? parseFloat(costPrice) : 0,
+        stock: 0,
+        image: image || null,
+        supplierId: supplierId || null,
+      },
+    });
+
+    if (openingQuantity > 0) {
+      const branch = await resolveBranchForUser(prisma, {
+        tenantId,
+        user: req.user,
+        branchId: req.headers['x-branch-id'],
+        permission: 'inventory.adjust',
       });
-      if (openingQuantity > 0) {
-        const branch = await resolveBranchForUser(tx, {
-          tenantId,
-          user: req.user,
-          branchId: req.headers['x-branch-id'],
-          permission: 'inventory.adjust',
-        });
-        await applyMovementInTransaction(tx, {
+      await prisma.branchInventory.upsert({
+        where: { branchId_variantId: { branchId: branch.id, variantId: created.id } },
+        create: { tenantId, branchId: branch.id, variantId: created.id, quantity: 0 },
+        update: {},
+      });
+      await prisma.branchInventory.update({
+        where: { branchId_variantId: { branchId: branch.id, variantId: created.id } },
+        data: { quantity: openingQuantity },
+      });
+      await prisma.variant.update({
+        where: { id: created.id },
+        data: { stock: { increment: openingQuantity } },
+      });
+      await prisma.inventoryMovement.create({
+        data: {
           tenantId,
           branchId: branch.id,
           variantId: created.id,
           type: 'ADJUSTMENT',
           quantity: openingQuantity,
+          previousStock: 0,
+          newStock: openingQuantity,
           idempotencyKey: `variant-create:${created.id}:opening-stock`,
           actorId: req.user.id,
           referenceType: 'VARIANT_CREATE',
           referenceId: created.id,
           note: 'Initial variant stock',
-        });
-      }
-      return tx.variant.findUnique({ where: { id: created.id } });
-    });
+        },
+      });
+      await prisma.inventoryLog.create({
+        data: {
+          variantId: created.id,
+          quantity: openingQuantity,
+          reason: 'ADJUSTMENT',
+        },
+      });
+    }
+
+    const variant = await prisma.variant.findUnique({ where: { id: created.id } });
     res.status(201).json({ success: true, data: variant });
   } catch (error) {
     next(error);
@@ -427,51 +458,72 @@ exports.updateVariant = async (req, res, next) => {
       }
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
-      if (stock !== undefined) {
-        const targetStock = Number(stock);
-        if (!Number.isFinite(targetStock) || targetStock < 0) {
-          const error = new Error('stock must be a non-negative number');
-          error.status = 400;
-          throw error;
-        }
-        const branch = await resolveBranchForUser(tx, {
-          tenantId,
-          user: req.user,
-          branchId: req.headers['x-branch-id'],
-          permission: 'inventory.adjust',
-        });
-        const balance = await tx.branchInventory.findUnique({
+    if (stock !== undefined) {
+      const targetStock = Number(stock);
+      if (!Number.isFinite(targetStock) || targetStock < 0) {
+        return res.status(400).json({ success: false, message: 'stock must be a non-negative number' });
+      }
+      const branch = await resolveBranchForUser(prisma, {
+        tenantId,
+        user: req.user,
+        branchId: req.headers['x-branch-id'],
+        permission: 'inventory.adjust',
+      });
+      const balance = await prisma.branchInventory.findUnique({
+        where: { branchId_variantId: { branchId: branch.id, variantId: id } },
+        select: { quantity: true },
+      });
+      const delta = targetStock - Number(balance?.quantity || 0);
+      if (delta !== 0) {
+        await prisma.branchInventory.upsert({
           where: { branchId_variantId: { branchId: branch.id, variantId: id } },
-          select: { quantity: true },
+          create: { tenantId, branchId: branch.id, variantId: id, quantity: 0 },
+          update: {},
         });
-        const delta = targetStock - Number(balance?.quantity || 0);
-        if (delta !== 0) {
-          await applyMovementInTransaction(tx, {
+        await prisma.branchInventory.update({
+          where: { branchId_variantId: { branchId: branch.id, variantId: id } },
+          data: { quantity: Number(balance?.quantity || 0) + delta },
+        });
+        await prisma.variant.update({
+          where: { id },
+          data: { stock: { increment: delta } },
+        });
+        await prisma.inventoryMovement.create({
+          data: {
             tenantId,
             branchId: branch.id,
             variantId: id,
             type: 'ADJUSTMENT',
             quantity: delta,
+            previousStock: Number(balance?.quantity || 0),
+            newStock: Number(balance?.quantity || 0) + delta,
             idempotencyKey: `variant-update:${id}:${randomUUID()}`,
             actorId: req.user.id,
             referenceType: 'VARIANT_UPDATE',
             referenceId: id,
             note: 'Variant stock updated',
-          });
-        }
+          },
+        });
+        await prisma.inventoryLog.create({
+          data: {
+            variantId: id,
+            quantity: delta,
+            reason: 'ADJUSTMENT',
+          },
+        });
       }
-      return tx.variant.update({
-        where: { id },
-        data: {
-          price: price !== undefined ? parseFloat(price) : undefined,
-          image: image !== undefined ? image : undefined,
-          attributes: attributes || undefined,
-          compareAtPrice: compareAtPrice !== undefined ? (compareAtPrice ? parseFloat(compareAtPrice) : null) : undefined,
-          costPrice: costPrice !== undefined ? parseFloat(costPrice) : undefined,
-          supplierId: supplierId !== undefined ? supplierId : undefined,
-        },
-      });
+    }
+
+    const updated = await prisma.variant.update({
+      where: { id },
+      data: {
+        price: price !== undefined ? parseFloat(price) : undefined,
+        image: image !== undefined ? image : undefined,
+        attributes: attributes || undefined,
+        compareAtPrice: compareAtPrice !== undefined ? (compareAtPrice ? parseFloat(compareAtPrice) : null) : undefined,
+        costPrice: costPrice !== undefined ? parseFloat(costPrice) : undefined,
+        supplierId: supplierId !== undefined ? supplierId : undefined,
+      },
     });
     res.json({ success: true, data: updated });
   } catch (error) {

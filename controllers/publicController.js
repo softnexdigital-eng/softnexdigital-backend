@@ -52,21 +52,27 @@ function parseImages(images) {
   return [];
 }
 
-// Normalize legacy attribute values to flat { key: "string" }
+// Normalize legacy attribute values to flat { key: "string" | string[] }
 function normalizeVariantAttributes(attrs) {
   if (!attrs || typeof attrs !== 'object' || Array.isArray(attrs)) return {};
   const out = {};
   for (const [key, value] of Object.entries(attrs)) {
     if (value == null) continue;
+    if (Array.isArray(value)) {
+      out[String(key)] = value.map(String).filter(Boolean);
+      continue;
+    }
     let v = value;
-    if (Array.isArray(v)) v = v.length ? v[0] : null;
     if (typeof v === 'string') {
       const t = v.trim();
       if (t.startsWith('[') && t.endsWith(']')) {
         try {
           const parsed = JSON.parse(t);
-          if (Array.isArray(parsed)) v = parsed.length ? parsed[0] : null;
-          else v = t;
+          if (Array.isArray(parsed)) {
+            out[String(key)] = parsed.map(String).filter(Boolean);
+            continue;
+          }
+          v = t;
         } catch { v = t; }
       } else {
         v = t;

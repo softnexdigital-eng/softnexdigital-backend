@@ -1,0 +1,30 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+enum InventoryMovementType {
+  OPENING_STOCK
+  SALE
+  RETURN
+  PURCHASE
+  ADJUSTMENT
+  TRANSFER_IN
+  TRANSFER_OUT
+  DAMAGE
+  EXPIRED
+  LOST
+  STOCK_COUNT
+  WASTE
+  REVERSAL
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BusinessType {
+  SUPERMARKET

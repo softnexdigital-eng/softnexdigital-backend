@@ -89,3 +89,13 @@ P1B granular permission implementation and specification reconciliation: canonic
 ## Exact next step
 
 Close the remaining P1B onboarding/branch-selector acceptance gaps with supported flow tests; keep P1B IN_PROGRESS until the full Definition of Done is verified. Separately repair the root `test-tenant.js` Node module-format failure before relying on broad `node --test` discovery. Continue with P2A PostgreSQL concurrency and legacy checkout regressions, P3A migration/idempotency/payment branch scope, and only then unblock P3B.
+
+## Database Setup Fix
+
+| Task | Status | DB models | Migration | Backend files | API endpoints | Frontend files | Permissions | Tests | Remaining work |
+|---|---|---|---|---|---|---|---|---|---|
+| Database connection setup (DATABASE_URL) | COMPLETED | N/A (prerequisite) | N/A | .env, .env.example | N/A | N/A | N/A | N/A | PostgreSQL must be running on localhost:5432 before starting the server |
+
+Key change: Created `.env` with `DATABASE_URL="postgresql://postgres:@localhost:5432/postgres?sslmode=disable"`.
+The project uses PostgreSQL (schema has Json fields and enums that SQLite does not support).
+After creating `.env`, run `npx prisma migrate dev` to initialize the database, then `npm run dev` to start the server.
