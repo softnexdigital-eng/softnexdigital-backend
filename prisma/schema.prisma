@@ -114,11 +114,12 @@ model Tenant {
   orders                  Order[]
   paymentTransactions     PaymentTransaction[]
   products                Product[]
-  reviews                 Review[]
+  best3Products          Best3Product[]
+  reviews                  Review[]
   shippingMethods         ShippingMethod[]
   suppliers               Supplier[]
   users                   User[]
-  wishlists               Wishlist[]
+  wishlists              Wishlist[]
   banners                 Banner[]
   incompleteCheckouts     IncompleteCheckout[]
   couriers                Courier[]
@@ -363,6 +364,24 @@ model Product {
   categories      ProductCategory[]
   imagesRel       ProductImage[]
   variants        Variant[]
+  best3Entries    Best3Product[]
+}
+
+model Best3Product {
+  id           String   @id @default(uuid())
+  tenantId     String
+  productId    String
+  variantId    String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant      Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, productId])
+  @@index([tenantId, isActive, displayOrder])
 }
 
 model Supplier {
@@ -529,7 +548,7 @@ model Variant {
   supplierId     String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-cartItems      CartItem[]
+  cartItems      CartItem[]
     inventoryLogs  InventoryLog[]
     orderItems     OrderItem[]
     product        Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -538,12 +557,18 @@ cartItems      CartItem[]
     variantImages  VariantImage[]
     branchInventories BranchInventory[]
     inventoryMovements InventoryMovement[]
-    inventoryAdjustments InventoryAdjustment[]
     purchaseOrderItems PurchaseOrderItem[]
     purchaseReceiptItems PurchaseReceiptItem[]
+    // Pre-order management fields
+    isPreOrder          Boolean              @default(false)
+    preOrderEstimatedDelivery String?
+    preOrderPrice       Float?
+    best3Entries        Best3Product[]
+    inventoryAdjustments InventoryAdjustment[]
 
     @@index([supplierId])
-}
+    @@index([isPreOrder])
+  }
 
 model BlockedPhone {
   id        String   @id @default(uuid())

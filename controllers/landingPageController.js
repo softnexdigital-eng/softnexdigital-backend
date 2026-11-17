@@ -238,6 +238,9 @@ exports.getPublicLandingPage = async (req, res, next) => {
       stock: stockSum(v),
       image: v.image ?? null,
       attributes: normalizeAttrs(v.attributes),
+      isPreOrder: v.isPreOrder || false,
+      preOrderEstimatedDelivery: v.preOrderEstimatedDelivery || null,
+      preOrderPrice: v.preOrderPrice ?? null,
     });
 
     // Fix: parse images for each product (backward compatibility)

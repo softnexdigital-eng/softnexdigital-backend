@@ -7,6 +7,7 @@ const { getPublicLandingPage, getPublicLandingTheme } = require("../controllers/
 const { listPublicStores } = require("../controllers/publicStoreController");
 const { createReview, getPublicReviews, updateReview, deleteReview } = require("../controllers/reviewController");
 const { rateLimiter } = require("../middleware/rateLimit");
+const { getPublicBest3Products, getPublicPreOrderProducts } = require("../controllers/publicController");
 
 const router = express.Router();
 
@@ -39,6 +40,8 @@ router.get("/wishlist", getPublicWishlist);
 // Landing page endpoints
 router.get("/stores", listPublicStores);
 router.get("/landing-page/:slug", getPublicLandingPage);
+router.get("/best3-products", getPublicBest3Products);
+router.get("/preorder-products", getPublicPreOrderProducts);
 router.get("/banners/:tenantId", getPublicBanners);
 router.post("/page-view/:slug", trackPageView);
 router.get("/page-stats/:slug", getPageStats);

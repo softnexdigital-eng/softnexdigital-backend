@@ -102,6 +102,9 @@ function toPublicVariant(v, branchId) {
     stock: sumBranchInventory(v, branchId),
     image: v.image ?? null,
     attributes: normalizeVariantAttributes(v.attributes),
+    isPreOrder: v.isPreOrder || false,
+    preOrderEstimatedDelivery: v.preOrderEstimatedDelivery || null,
+    preOrderPrice: v.preOrderPrice ?? null,
   };
 }
 
@@ -584,16 +587,18 @@ const createPublicOrder = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "This shop is currently inactive" });
       }
 
-      // Validate stock for all items
+      // Validate stock for all items (pre-order items bypass normal stock checks)
       for (const cartItem of cart.items) {
-        if (cartItem.variant.stock < cartItem.quantity) {
+        const isPreOrderItem = cartItem.variant.isPreOrder || (cartItem.variant.preOrderPrice != null && cartItem.variant.preOrderPrice > 0);
+        if (!isPreOrderItem && cartItem.variant.stock < cartItem.quantity) {
           const attrs = Object.values(cartItem.variant.attributes).join(", ");
           return res.status(400).json({
             success: false,
             message: `Insufficient stock for "${cartItem.variant.product.name} — ${attrs}". Only ${cartItem.variant.stock} available.`,
           });
         }
-        const lineTotal = cartItem.variant.price * cartItem.quantity;
+        const price = isPreOrderItem && cartItem.variant.preOrderPrice != null && cartItem.variant.preOrderPrice > 0 ? cartItem.variant.preOrderPrice : cartItem.variant.price;
+        const lineTotal = price * cartItem.quantity;
         subtotal += lineTotal;
         const selected = selectedCartAttributes?.[cartItem.variantId];
         const resolved = resolveOrderAttributes(cartItem.variant.attributes, selected);
@@ -605,7 +610,7 @@ const createPublicOrder = async (req, res, next) => {
           skuAtTime: cartItem.variant.sku,
           attributes: resolved.attributes,
           quantity: cartItem.quantity,
-          priceAtTime: cartItem.variant.price,
+          priceAtTime: price,
           total: lineTotal,
         });
       }
@@ -633,7 +638,8 @@ const createPublicOrder = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "This shop is currently inactive" });
       }
 
-      if (variant.stock < quantity) {
+      const isPreOrderItem = variant.isPreOrder || (variant.preOrderPrice != null && variant.preOrderPrice > 0);
+      if (!isPreOrderItem && variant.stock < quantity) {
         return res.status(400).json({
           success: false,
           message: `Insufficient stock. Only ${variant.stock} available.`,
@@ -644,13 +650,14 @@ const createPublicOrder = async (req, res, next) => {
       if (resolved.error) {
         return res.status(400).json({ success: false, message: resolved.error });
       }
-      subtotal = variant.price * quantity;
+      const price = isPreOrderItem && variant.preOrderPrice != null && variant.preOrderPrice > 0 ? variant.preOrderPrice : variant.price;
+      subtotal = price * quantity;
       orderItemsData.push({
         variantId: variant.id,
         skuAtTime: variant.sku,
         attributes: resolved.attributes,
         quantity,
-        priceAtTime: variant.price,
+        priceAtTime: price,
         total: subtotal,
       });
     }
@@ -1436,6 +1443,147 @@ const getCartPublic = async (req, res, next) => {
   }
 };
 
+/**
+ * Get best-3 products for a tenant (public storefront)
+ * GET /api/public/best3-products?tenantSlug=...
+ */
+const getPublicBest3Products = async (req, res, next) => {
+  try {
+    const { tenantSlug } = req.query;
+    let tenantId = null;
+    if (tenantSlug) {
+      const tenant = await prisma.tenant.findFirst({
+        where: { OR: [{ slug: tenantSlug }, { email: tenantSlug }] },
+        select: { id: true },
+      });
+      if (tenant) tenantId = tenant.id;
+    }
+    if (!tenantId) {
+      return res.status(400).json({ success: false, message: "tenantSlug is required" });
+    }
+
+    const entries = await prisma.best3Product.findMany({
+      where: { tenantId, isActive: true },
+      orderBy: { displayOrder: "asc" },
+      include: {
+        product: {
+          include: {
+            variants: {
+              orderBy: { price: "asc" },
+              include: { branchInventories: { select: { branchId: true, quantity: true } } },
+            },
+            categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+            imagesRel: { orderBy: { sortOrder: "asc" } },
+          },
+        },
+      },
+    });
+
+    let defaultBranchId = null;
+    const defBranch = await prisma.branch.findFirst({
+      where: { tenantId, isDefault: true, isActive: true },
+      select: { id: true },
+    });
+    defaultBranchId = defBranch?.id || null;
+
+    const data = entries
+      .filter((e) => e.product)
+      .map((e) => {
+        const p = e.product;
+        const images = parseImages(p.images);
+        if (Array.isArray(p.imagesRel)) {
+          p.imagesRel.forEach((img) => {
+            if (img?.url && !images.includes(img.url)) images.push(img.url);
+          });
+        }
+        return {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          images,
+          categories: (p.categories || []).map(toPublicCategory).filter(Boolean),
+          variants: (p.variants || [])
+            .map((v) => toPublicVariant(v, defaultBranchId)),
+          displayOrder: e.displayOrder,
+        };
+      });
+
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get pre-order enabled products for a tenant (public storefront)
+ * GET /api/public/preorder-products?tenantSlug=...
+ */
+const getPublicPreOrderProducts = async (req, res, next) => {
+  try {
+    const { tenantSlug } = req.query;
+    let tenantId = null;
+    if (tenantSlug) {
+      const tenant = await prisma.tenant.findFirst({
+        where: { OR: [{ slug: tenantSlug }, { email: tenantSlug }] },
+        select: { id: true },
+      });
+      if (tenant) tenantId = tenant.id;
+    }
+    if (!tenantId) {
+      return res.status(400).json({ success: false, message: "tenantSlug is required" });
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        tenantId,
+        variants: {
+          some: {
+            OR: [{ isPreOrder: true }, { preOrderPrice: { gt: 0 } }],
+          },
+        },
+      },
+      include: {
+        variants: {
+          where: { OR: [{ isPreOrder: true }, { preOrderPrice: { gt: 0 } }] },
+          orderBy: { price: "asc" },
+          include: { branchInventories: { select: { branchId: true, quantity: true } } },
+        },
+        categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+        imagesRel: { orderBy: { sortOrder: "asc" } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    let defaultBranchId = null;
+    const defBranch = await prisma.branch.findFirst({
+      where: { tenantId, isDefault: true, isActive: true },
+      select: { id: true },
+    });
+    defaultBranchId = defBranch?.id || null;
+
+    const data = products.map((p) => {
+      const images = parseImages(p.images);
+      if (Array.isArray(p.imagesRel)) {
+        p.imagesRel.forEach((img) => {
+          if (img?.url && !images.includes(img.url)) images.push(img.url);
+        });
+      }
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        images,
+        categories: (p.categories || []).map(toPublicCategory).filter(Boolean),
+        variants: (p.variants || []).map((v) => toPublicVariant(v, defaultBranchId)),
+      };
+    });
+
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createPublicOrder,
   getPublicOrderTracking,
@@ -1454,4 +1602,6 @@ module.exports = {
   removeFromCartPublic,
   updateCartPublic,
   getCartPublic,
+  getPublicBest3Products,
+  getPublicPreOrderProducts,
 };

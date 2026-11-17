@@ -43,6 +43,8 @@ const businessProfileRoutes = require("./routes/businessProfileRoutes");
 const businessSettingsRoutes = require("./routes/businessSettingsRoutes");
 const branchRoutes = require("./routes/branchRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
+const best3ProductRoutes = require("./routes/best3ProductRoutes");
+const preorderRoutes = require("./routes/preorderRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -114,6 +116,8 @@ app.use("/api/business-profile", businessProfileRoutes);
 app.use("/api/business-settings", businessSettingsRoutes);
 app.use("/api/branches", branchRoutes);
 app.use("/api/purchases", purchaseRoutes);
+app.use("/api/best3-products", best3ProductRoutes);
+app.use("/api/preorder", preorderRoutes);
 
 // 404 handler
 app.use((req, res) => {

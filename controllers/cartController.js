@@ -62,6 +62,12 @@ exports.addItem = async (req, res, next) => {
     });
     if (!variant) return res.status(404).json({ success: false, message: 'Variant not found' });
     
+    // Pre-order items can be added to cart even if stock is 0
+    const isPreOrderItem = variant.isPreOrder || (variant.preOrderPrice != null && variant.preOrderPrice > 0);
+    if (!isPreOrderItem && variant.stock < 1) {
+      return res.status(400).json({ success: false, message: 'Variant is out of stock' });
+    }
+    
     const cart = await getOrCreateCart(tenantId, sessionId, userId);
     
     // Check if item already in cart
