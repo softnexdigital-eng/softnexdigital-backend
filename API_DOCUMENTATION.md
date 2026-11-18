@@ -56,4 +56,4 @@ Inventory operations are implemented but depend on the additive P2A schema migra
 
 ## Validation and error responses
 
-Business-foundation inputs are validated in `controllers/businessFoundationController.js`. Duplicate unique values return HTTP 409; invalid references/input return HTTP 400; records outside the authenticated tenant return HTTP 404. Unexpected errors are forwarded to the global error handler.
+Business-foundation inputs are validated in `controllers/businessFoundationController.js`. Duplicate unique values return HTTP 409; invalid references/input return HTTP 400; records outside the authenticated tenant return HTTP 404. Unexpected errors are forwarded to the global error handler.fdgdfgfdgfdgfdgfd
