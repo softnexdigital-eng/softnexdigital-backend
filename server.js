@@ -55,7 +55,7 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.FRONTEND_URL,
-      'https://softnexdigital-frontend.vercel.app',
+      'http://localhost:3000',
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
