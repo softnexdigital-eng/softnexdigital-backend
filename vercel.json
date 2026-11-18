@@ -7,8 +7,7 @@
   "env": { "NODE_ENV": "production" },
   "functions": {
     "api/index.js": {
-      "includeFiles": "Controllers/**",
-      "runtime": "nodejs18.x"
+      "includeFiles": "controllers/**"
     }
   }
 }
