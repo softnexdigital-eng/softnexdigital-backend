@@ -6,7 +6,7 @@ const {
   setBest3Products,
   toggleBest3Product,
   removeBest3Product,
-} = require("../Controllers/best3ProductController");
+} = require("../controllers/best3ProductController");
 
 const router = express.Router();
 
