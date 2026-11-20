@@ -45,6 +45,7 @@ const branchRoutes = require("./routes/branchRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const best3ProductRoutes = require("./routes/best3ProductRoutes");
 const preorderRoutes = require("./routes/preorderRoutes");
+const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,7 +56,7 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.FRONTEND_URL,
-      'https://softnexdigital-frontend.vercel.app',
+      'http://localhost:3000',
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -118,6 +119,7 @@ app.use("/api/branches", branchRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/best3-products", best3ProductRoutes);
 app.use("/api/preorder", preorderRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 handler
 app.use((req, res) => {
