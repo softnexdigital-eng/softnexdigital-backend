@@ -242,7 +242,7 @@ function generateInvoiceHtml(order, tenant) {
  * @param {Object} tenant - Tenant settings
  * @param {string} frontendUrl
  */
-async function sendInvoiceToCustomer(customerEmail, order, tenant, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
+async function sendInvoiceToCustomer(customerEmail, order, tenant, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
   if (!customerEmail) return true;
   try {
     const html = generateInvoiceHtml(order, tenant);
@@ -274,7 +274,7 @@ async function sendInvoiceToCustomer(customerEmail, order, tenant, frontendUrl =
  * @param {Object} order - Order object with id, orderNumber, customerName, total, etc.
  * @param {string} frontendUrl - Base URL for frontend (e.g., softnexdigital-frontend.vercel.app/)
  */
-async function sendNewOrderEmail(adminEmail, order, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
+async function sendNewOrderEmail(adminEmail, order, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
   try {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px;">
@@ -313,7 +313,7 @@ async function sendNewOrderEmail(adminEmail, order, frontendUrl = process.env.FR
  * @param {string} newStatus
  * @param {string} frontendUrl
  */
-async function sendOrderStatusEmail(customerEmail, orderNumber, newStatus, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
+async function sendOrderStatusEmail(customerEmail, orderNumber, newStatus, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
   if (!customerEmail) return true;
   try {
     const html = `
@@ -367,7 +367,7 @@ async function generateOrderNumber(tenantId, prisma) {
  * @param {number} refundAmount
  * @param {string} frontendUrl
  */
-async function sendRefundEmail(customerEmail, orderNumber, refundAmount, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
+async function sendRefundEmail(customerEmail, orderNumber, refundAmount, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
   if (!customerEmail) return true;
   try {
     const html = `
@@ -408,7 +408,7 @@ async function sendRefundEmail(customerEmail, orderNumber, refundAmount, fronten
  * @param {string} resetToken - Password reset token
  * @param {string} frontendUrl
  */
-async function sendPasswordResetEmail(email, resetToken, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
+async function sendPasswordResetEmail(email, resetToken, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
   try {
     const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
     const html = `

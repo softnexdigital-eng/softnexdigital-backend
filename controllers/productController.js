@@ -259,7 +259,7 @@ exports.deleteProduct = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    // Get variant IDs and delete CartItem/Wishlist/VariantImage records first (foreign key constraint)
+    // Get variant IDs and delete related records first (foreign key constraint)
     const variants = await prisma.variant.findMany({
       where: { productId: product.id },
       select: { id: true },
@@ -269,6 +269,7 @@ exports.deleteProduct = async (req, res, next) => {
       await prisma.cartItem.deleteMany({ where: { variantId: { in: variantIds } } });
       await prisma.wishlist.deleteMany({ where: { variantId: { in: variantIds } } });
       await prisma.variantImage.deleteMany({ where: { variantId: { in: variantIds } } });
+      await prisma.orderItem.deleteMany({ where: { variantId: { in: variantIds } } });
     }
 
     await prisma.product.delete({ where: { id: product.id } });
@@ -304,6 +305,8 @@ exports.bulkDeleteProducts = async (req, res, next) => {
       // Delete Wishlist records referencing these variants (foreign key constraint)
       await prisma.wishlist.deleteMany({ where: { variantId: { in: variantIds } } });
       await prisma.variantImage.deleteMany({ where: { variantId: { in: variantIds } } });
+      // Delete OrderItem records referencing these variants (foreign key constraint)
+      await prisma.orderItem.deleteMany({ where: { variantId: { in: variantIds } } });
     }
 
     const result = await prisma.product.deleteMany({
