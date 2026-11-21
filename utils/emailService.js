@@ -32,17 +32,10 @@ if (hasValidSmtpConfig) {
 async function sendOtpEmail(email, otp) {
   try {
     if (!transporter) {
-      // If email not configured, log to console
-      console.log(`
-        ╔════════════════════════════════════════╗
-        ║         OTP VERIFICATION CODE          ║
-        ╠════════════════════════════════════════╣
-        ║  Email: ${email.padEnd(35)} ║
-        ║  OTP:   ${otp.padEnd(35)} ║
-        ║  Valid for 5 minutes                   ║
-        ╚════════════════════════════════════════╝
-      `);
-      return true;
+      console.error(
+        `EMAIL NOT CONFIGURED: SMTP env vars missing. OTP for ${email} is ${otp}. Set SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_FROM on your hosting platform (Vercel/Render).`
+      );
+      return false;
     }
 
     const mailOptions = {
@@ -57,6 +50,7 @@ async function sendOtpEmail(email, otp) {
             <h1 style="letter-spacing: 5px; color: #333; margin: 0;">${otp}</h1>
           </div>
           <p>This code is valid for 5 minutes only. Do not share this code with anyone.</p>
+          <p>Gmail inbox-এ OTP না পেলে Spam folder চেক করুন।</p>
           <p>If you didn't request this code, please ignore this email.</p>
           <hr>
           <p style="color: #666; font-size: 12px;">This is an automated message, please do not reply to this email.</p>
@@ -69,8 +63,7 @@ async function sendOtpEmail(email, otp) {
     return true;
   } catch (error) {
     console.error("Error sending OTP email:", error.message);
-    // Still return true to allow user to try verification with console-logged OTP
-    return true;
+    return false;
   }
 }
 
@@ -249,7 +242,7 @@ function generateInvoiceHtml(order, tenant) {
  * @param {Object} tenant - Tenant settings
  * @param {string} frontendUrl
  */
-async function sendInvoiceToCustomer(customerEmail, order, tenant, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
+async function sendInvoiceToCustomer(customerEmail, order, tenant, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
   if (!customerEmail) return true;
   try {
     const html = generateInvoiceHtml(order, tenant);
@@ -281,7 +274,7 @@ async function sendInvoiceToCustomer(customerEmail, order, tenant, frontendUrl =
  * @param {Object} order - Order object with id, orderNumber, customerName, total, etc.
  * @param {string} frontendUrl - Base URL for frontend (e.g., softnexdigital-frontend.vercel.app/)
  */
-async function sendNewOrderEmail(adminEmail, order, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
+async function sendNewOrderEmail(adminEmail, order, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
   try {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px;">
@@ -320,7 +313,7 @@ async function sendNewOrderEmail(adminEmail, order, frontendUrl = process.env.FR
  * @param {string} newStatus
  * @param {string} frontendUrl
  */
-async function sendOrderStatusEmail(customerEmail, orderNumber, newStatus, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
+async function sendOrderStatusEmail(customerEmail, orderNumber, newStatus, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
   if (!customerEmail) return true;
   try {
     const html = `
@@ -374,7 +367,7 @@ async function generateOrderNumber(tenantId, prisma) {
  * @param {number} refundAmount
  * @param {string} frontendUrl
  */
-async function sendRefundEmail(customerEmail, orderNumber, refundAmount, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
+async function sendRefundEmail(customerEmail, orderNumber, refundAmount, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
   if (!customerEmail) return true;
   try {
     const html = `
@@ -415,7 +408,7 @@ async function sendRefundEmail(customerEmail, orderNumber, refundAmount, fronten
  * @param {string} resetToken - Password reset token
  * @param {string} frontendUrl
  */
-async function sendPasswordResetEmail(email, resetToken, frontendUrl = process.env.FRONTEND_URL || "https://softnexdigital-frontend.vercel.app") {
+async function sendPasswordResetEmail(email, resetToken, frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000") {
   try {
     const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
     const html = `

@@ -110,11 +110,13 @@ const register = async (req, res) => {
     saveOtp(normalizedEmail, otp, 300);
 
     // Send OTP email
-    await sendOtpEmail(normalizedEmail, otp);
+    const emailSent = await sendOtpEmail(normalizedEmail, otp);
 
     return res.status(201).json({
       success: true,
-      message: existingUser ? "OTP sent to your email." : "Registration initiated. OTP sent to email.",
+      message: emailSent
+        ? (existingUser ? "OTP sent to your email." : "Registration initiated. OTP sent to email.")
+        : "Registration initiated, but the OTP email could not be sent. Please check server logs or try again later.",
       data: {
         email: normalizedEmail,
         userId,
@@ -240,11 +242,11 @@ const resendOtp = async (req, res) => {
 
     const otp = generateOTP();
     saveOtp(normalizedEmail, otp, 300);
-    await sendOtpEmail(normalizedEmail, otp);
+    const emailSent = await sendOtpEmail(normalizedEmail, otp);
 
     return res.status(200).json({
-      success: true,
-      message: "OTP resent to email.",
+      success: emailSent,
+      message: emailSent ? "OTP resent to email." : "Failed to resend OTP email.",
       data: { email: normalizedEmail },
     });
   } catch (error) {
